@@ -1,0 +1,158 @@
+#!/usr/bin/
+
+import sys
+import subprocess
+import time
+import random
+import pymongo
+import datetime
+import sys
+import time
+import numpy
+from colors import *
+from pymongo import MongoClient
+from pprint import pprint
+from difflib import SequenceMatcher
+from wit import Wit
+
+client_wit = Wit('YOUR KEY HERE')
+
+client = MongoClient('localhost', 27017)
+db = client.words_database
+responses = db.responses
+allwords = db.allwords
+
+inputWords = ("hello")
+globalReply = ("hello")
+botAccuracy = 0.725
+botAccuracyLower = 0.45
+
+class talkLoop(object):
+
+	def __init__(self, client, db, responses, allwords, inputwords, globalReply, botAccuracy, botAccuracyLower):
+		self.client = client
+		self.db = db
+		self.responses = responses
+		self.allwords = allwords
+		self.inputwords = inputwords
+		self.globalReply = globalReply
+		self.botAccuracy = botAccuracy
+		self.botAccuracyLower = botAccuracyLower
+		
+	def similar(self, a, b):
+		return SequenceMatcher(None, a, b).ratio()
+		
+	def get_random_doc(self):
+		count = self.allwords.count()
+		return self.allwords.find()[random.randrange(count)]
+		
+	def sentenceGen(self):
+		result = ""
+		length = random.randint(1, 10)
+	
+		for i in range(length):
+			cursor = self.get_random_doc()
+			for x, y in cursor.items():
+				if x == "word":
+					cWord = (y)
+					result += cWord
+					result += ' '
+					del cursor
+	
+		return result
+	
+	def dbSearch(self, searchIn):
+		cursor = self.responses.find_one({"whatbotsaid": searchIn})
+		for x, y in cursor.items():
+			if x == 'humanReply':
+				chosenReply = (random.choice(y))
+		del cursor
+		return chosenReply
+		
+	def mongoFuzzyMatch(self, inputString, searchZone, termZone, setting):
+		compareList = {}
+		for cursor in searchZone.find():
+			for x, y in cursor.items():				
+				if x == termZone:
+					compareNo = self.similar(inputString, y)
+					if setting == ('off'):
+						compareList[y] = compareNo
+					elif setting == ('med'):
+						if compareNo > self.botAccuracyLower:
+							compareList[y] = compareNo
+					elif setting == ('on'):
+						if compareNo > self.botAccuracy:
+							compareList[y] = compareNo
+		if compareList == {}:
+			compareChosen = 'none_match'		
+		else:
+			compareChosen = max(compareList.iterkeys(), key=(lambda key: compareList[key]))
+		del cursor
+		return compareChosen
+
+	def replyTumbler(self):
+		searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'on')
+		if searchSaid == ('none_match'):
+			searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'med')
+			if searchSaid == ('none_match'):
+				if int(self.allwords.count()) < 20:
+					searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'off')
+					chosenReply = self.dbSearch(searchSaid)			
+				else:	
+					chosenReply = self.sentenceGen()
+			else:
+				chosenReply = self.dbSearch(searchSaid)
+		else:		
+			chosenReply = self.dbSearch(searchSaid)
+		del searchSaid
+		return (chosenReply)
+
+	def updateDB(self, wordsIn, bResponse):
+		self.wordsIn = wordsIn
+		self.bResponse = bResponse
+		cursor = self.responses.find_one({"whatbotsaid": self.bResponse})
+
+		if cursor is None:
+			postR = {"whatbotsaid": self.bResponse, "humanReply": [self.wordsIn]}
+			self.responses.insert_one(postR).inserted_id
+			del cursor
+		else:
+			self.responses.update({"whatbotsaid": self.bResponse}, {'$addToSet':{"humanReply": self.wordsIn}}, upsert=True)
+			del cursor
+		wordsInDB = self.wordsIn.split(' ')
+		for word in wordsInDB:
+			cursor = self.allwords.find_one({"word": word})
+			if cursor is None:
+				postW = {"word": word}
+				self.allwords.insert_one(postW).inserted_id
+			else:
+				pass
+			del cursor
+
+talkClass = talkLoop(client, db, responses, allwords, inputWords, globalReply, botAccuracy, botAccuracyLower)
+talkClass.updateDB(inputWords, globalReply)
+inputWords = (talkClass.replyTumbler())
+talkClass.updateDB(inputWords, globalReply)
+globalReply = (talkClass.replyTumbler())
+subprocess.call(['espeak', globalReply])
+sys.stdout.write(BLUE)
+print (globalReply)
+sys.stdout.write(RESET)
+
+
+while True:
+	subprocess.call(['rec test.wav rate 32k silence 1 0.1 5% 1 3.0 5%'], shell=True)
+	resp = None
+	with open('test.wav', 'rb') as f:
+	  resp = client_wit.speech(f, None, {'Content-Type': 'audio/wav'})
+	inputWords = str(resp['_text'])
+	sys.stdout.write(RED)
+	print inputWords
+	sys.stdout.write(RESET)
+	talkClass.updateDB(inputWords, globalReply)
+	globalReply = (talkClass.replyTumbler())
+	subprocess.call(['espeak', globalReply])
+	sys.stdout.write(BLUE)
+	print(globalReply)
+	sys.stdout.write(RESET)
+
