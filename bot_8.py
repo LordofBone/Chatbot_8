@@ -90,12 +90,10 @@ class talkLoop(object):
 			searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'med')
 			if searchSaid == ('none_match'):
 				if random.randrange(100) <= 60:
-					print("sentence")
 					searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'off')
 					chosenReply = self.dbSearch(searchSaid)			
 				else:	
 					chosenReply = self.sentenceGen()
-					print("guess")
 			else:
 				chosenReply = self.dbSearch(searchSaid)
 		else:		
