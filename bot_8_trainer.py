@@ -43,3 +43,5 @@ for x in f:
 	learnClass.updateDB(inputWords, globalReply)
 
 	globalReply = x
+
+f.close()
