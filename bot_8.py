@@ -5,6 +5,7 @@ import datetime
 import sys
 import time
 import numpy
+import random
 from pymongo import MongoClient
 from pprint import pprint
 from colors import *
@@ -88,11 +89,13 @@ class talkLoop(object):
 		if searchSaid == ('none_match'):
 			searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'med')
 			if searchSaid == ('none_match'):
-				if int(self.allwords.count()) < 20:
+				if random.randrange(100) <= 60:
+					print("sentence")
 					searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'off')
 					chosenReply = self.dbSearch(searchSaid)			
 				else:	
 					chosenReply = self.sentenceGen()
+					print("guess")
 			else:
 				chosenReply = self.dbSearch(searchSaid)
 		else:		
@@ -122,23 +125,25 @@ class talkLoop(object):
 				pass
 			del cursor
 
-talkClass = talkLoop(client, db, responses, allwords, inputWords, globalReply, botAccuracy, botAccuracyLower)
-talkClass.updateDB(inputWords, globalReply)
-inputWords = (talkClass.replyTumbler())
-talkClass.updateDB(inputWords, globalReply)
-globalReply = (talkClass.replyTumbler())
-sys.stdout.write(BLUE)
-print (globalReply)
-sys.stdout.write(RESET)
+if __name__ == "__main__":
 
-while True:
-	sys.stdout.write(GREEN)
-	inputWords = raw_input('You:	')
-	sys.stdout.write(RESET)
-	if inputWords == (""):
-		continue
+	talkClass = talkLoop(client, db, responses, allwords, inputWords, globalReply, botAccuracy, botAccuracyLower)
+	talkClass.updateDB(inputWords, globalReply)
+	inputWords = (talkClass.replyTumbler())
 	talkClass.updateDB(inputWords, globalReply)
 	globalReply = (talkClass.replyTumbler())
 	sys.stdout.write(BLUE)
-	print(globalReply)
+	print (globalReply)
 	sys.stdout.write(RESET)
+
+	while True:
+		sys.stdout.write(GREEN)
+		inputWords = raw_input('You:	')
+		sys.stdout.write(RESET)
+		if inputWords == (""):
+			continue
+		talkClass.updateDB(inputWords, globalReply)
+		globalReply = (talkClass.replyTumbler())
+		sys.stdout.write(BLUE)
+		print(globalReply)
+		sys.stdout.write(RESET)
