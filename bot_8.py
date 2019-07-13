@@ -31,14 +31,16 @@ class talkLoop(object):
 		self.botAccuracyLower = botAccuracyLower
 		self.bResponse = globalReply
 		
+		self.updateDB(inputWords)
+		
 	#function for comparing string similarity
 	def similar(self, a, b):
 		return SequenceMatcher(None, a, b).ratio()
 	
 	#function for grabbing a random document from the database
-	def get_random_doc(self):
-		count = self.allwords.count()
-		return self.allwords.find()[random.randrange(count)]
+	def get_random_doc(self, collection):
+		count = collection.count()
+		return collection.find()[random.randrange(count)]
 	
 	#this function generates a random sentence at any length between 1 and 10 words long
 	def sentenceGen(self):
@@ -48,7 +50,7 @@ class talkLoop(object):
 		
 		#for the range in the integer above find a random word from the db and append to the string
 		for i in range(length):
-			cursor = self.get_random_doc()
+			cursor = self.get_random_doc(self.allwords)
 			for x, y in cursor.items():
 				if x == "word":
 					cWord = (y)
@@ -113,6 +115,9 @@ class talkLoop(object):
 	
 	
 	def replyTumbler(self):
+		if self.name == ("--trainer--"):
+			self.bResponse = self.wordsIn
+			return ("")
 		#find the search string using the high accuracy number - to find a decent match to what the bot has said prior
 		#when this function is called it required four arguments: the human response, the database to search on, the response required from the database and the accuracy level
 		searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'on')
@@ -139,7 +144,6 @@ class talkLoop(object):
 	#this function passes in the information from the loop, the input reply and the bots last reply and appends them to the database	
 	def updateDB(self, wordsIn):
 		self.wordsIn = wordsIn
-		
 		#search the database for prior responses the bot has said
 		cursor = self.responses.find_one({"whatbotsaid": self.bResponse})
 		#if none then store a new bot response with the humans reply

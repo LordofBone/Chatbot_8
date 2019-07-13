@@ -11,16 +11,11 @@ db = client.words_database
 responses = db.responses
 allwords = db.allwords
 
-inputWords = ("hello")
-globalReply = ("hello")
 botAccuracy = 0.725
 botAccuracyLower = 0.1
 
-learnClass = b.talkLoop(client, db, responses, allwords, inputWords, globalReply, botAccuracy, botAccuracyLower)
-learnClass.updateDB(inputWords, globalReply)
-inputWords = (learnClass.replyTumbler())
-learnClass.updateDB(inputWords, globalReply)
-globalReply = (learnClass.replyTumbler())
+name = ("--trainer--")
+inputWords = ("hello")
 
 try:
 	if sys.argv[1] == ("-fresh"):
@@ -29,19 +24,16 @@ try:
 except:
 	print("Existing DB training")
 
+b.conversation(inputWords, name)
+
 f = open("learning.txt", "r")
 
 for x in f:
-	inputWords = x
-	
-	if not re.search('[a-zA-Z]', inputWords):
+	if not re.search('[a-zA-Z]', x):
 		continue
 		
-	print("Sentence: " + inputWords)
-	print("Reply: " + globalReply)
-	
-	learnClass.updateDB(inputWords, globalReply)
+	print(x)
 
-	globalReply = x
+	b.conversation(x, name)
 
 f.close()
