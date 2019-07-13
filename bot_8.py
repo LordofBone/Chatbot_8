@@ -97,7 +97,7 @@ class talkLoop(object):
 					
 					#if accuracy is off then append the string and its accuracy to the dictionary no matter the accuracy
 					if setting == ('off'):
-						compareNo = fuzz.token_set_ratio(inputString, y)
+						compareNo = fuzz.token_set_ratio(inputString.lower(), y.lower())
 						if compareNo > self.botAccuracy:
 							compareList[y] = compareNo
 					#if accuracy is medium then append the string and its accuracy to the dictionary only if its over the medium setting
@@ -228,8 +228,8 @@ db = client.words_database
 responses = db.responses
 allwords = db.allwords
 
-#accuracy variables
-botAccuracy = 70
+#accuracy variable (percentage)
+botAccuracy = 85
 
 #blank variables
 name_dict = {}
