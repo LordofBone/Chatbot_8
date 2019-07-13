@@ -20,7 +20,7 @@ from fuzzywuzzy import fuzz
 class talkLoop(object):
 	
 	#initialise the class with all variables required
-	def __init__(self, name, client, db, responses, allwords, inputWords, globalReply, botAccuracy, botAccuracyLower):
+	def __init__(self, name, client, db, responses, allwords, inputWords, globalReply, botAccuracy):
 		self.name = name
 		self.client = client
 		self.db = db
@@ -29,7 +29,6 @@ class talkLoop(object):
 		self.wordsIn = inputWords
 		self.globalReply = globalReply
 		self.botAccuracy = botAccuracy
-		self.botAccuracyLower = botAccuracyLower
 		self.bResponse = globalReply
 		
 		self.updateDB(inputWords)
@@ -98,12 +97,13 @@ class talkLoop(object):
 					
 					#if accuracy is off then append the string and its accuracy to the dictionary no matter the accuracy
 					if setting == ('off'):
-						compareNo = fuzz.token_sort_ratio(inputString, y)
-						compareList[y] = compareNo
+						compareNo = fuzz.token_set_ratio(inputString, y)
+						if compareNo > self.botAccuracy:
+							compareList[y] = compareNo
 					#if accuracy is medium then append the string and its accuracy to the dictionary only if its over the medium setting
 					elif setting == ('med'):
 						compareNo = fuzz.partial_ratio(inputString.lower(), y.lower())
-						if compareNo > self.botAccuracyLower:
+						if compareNo > self.botAccuracy:
 							compareList[y] = compareNo
 					#if accuracy is on/high then append the string and its accuracy to the dictionary only if its over the on/high setting
 					elif setting == ('on'):
@@ -131,18 +131,22 @@ class talkLoop(object):
 		#if no matches then try with a lower accuracy to find a less similar sentence
 		if searchSaid == ('none_match'):
 			searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'med')
-			#if still no match then move onto generating a totally random reply or grab a random sentence from the db
 			if searchSaid == ('none_match'):
-				if random.randrange(100) <= 60:
-					return self.randomSentence()						
-				else:
-					chosenReply = self.sentenceGen()
-			else:
-				#pass the response into the database to find prior human responses to the above sentence
-				chosenReply = self.dbSearch(searchSaid)
-		else:
-			#pass the response into the database to find prior human responses to the above sentence		
-			chosenReply = self.dbSearch(searchSaid)
+				searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'off')
+				if searchSaid == ('none_match'):
+					#if still no match then move onto generating a totally random reply or grab a random sentence from the db
+					if searchSaid == ('none_match'):
+						if random.randrange(100) <= 60:
+							return self.randomSentence()									
+						else:
+							return self.sentenceGen()
+					else:
+						#pass the response into the database to find prior human responses to the above sentence
+						chosenReply = self.dbSearch(searchSaid)
+						
+		#pass the response into the database to find prior human responses to the above sentence		
+		chosenReply = self.dbSearch(searchSaid)
+			
 		#clear the search variable
 		del searchSaid
 		self.bResponse = chosenReply
@@ -206,7 +210,7 @@ def conversation(inputWords, personName):
 			globalReply = (name_dict[personName].replyTumbler())
 	else:
 		#if human new then initialise them with the talk loop class
-		name_dict.update({personName: talkLoop(name=personName, client=client, db=db, responses=responses, allwords=allwords, inputWords="hello", globalReply="hello", botAccuracy=botAccuracy, botAccuracyLower=botAccuracyLower)})
+		name_dict.update({personName: talkLoop(name=personName, client=client, db=db, responses=responses, allwords=allwords, inputWords="hello", globalReply="hello", botAccuracy=botAccuracy)})
 		#get an intial reply
 		globalReply = (name_dict[personName].replyTumbler())
 		#combine the greeting with the humans name
@@ -225,8 +229,7 @@ responses = db.responses
 allwords = db.allwords
 
 #accuracy variables
-botAccuracy = 95
-botAccuracyLower = 75
+botAccuracy = 70
 
 #blank variables
 name_dict = {}

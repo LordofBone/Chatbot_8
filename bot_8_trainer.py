@@ -6,14 +6,6 @@ from pymongo import MongoClient
 import bot_8 as b
 import deleteDB as d
 
-client = MongoClient('localhost', 27017)
-db = client.words_database
-responses = db.responses
-allwords = db.allwords
-
-botAccuracy = 0.725
-botAccuracyLower = 0.1
-
 name = ("--trainer--")
 inputWords = ("hello")
 
