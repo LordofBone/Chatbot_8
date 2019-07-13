@@ -21,11 +21,14 @@ b.conversation(inputWords, name)
 f = open("learning.txt", "r")
 
 for x in f:
-	if not re.search('[a-zA-Z]', x):
+	if not re.search('[a-zA-Z]', x[0]):
 		continue
 
-	if x[0] == ("(") or x[0] == ("-") or x[0] == ("*"):
-		continue
+	if (':') in x:
+		try:
+			x = str(x.split(": ")[1])
+		except IndexError:
+			continue
 		
 	print(x)
 
