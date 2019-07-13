@@ -36,16 +36,16 @@ class talkLoop(object):
 	def similar(self, a, b):
 		return SequenceMatcher(None, a, b).ratio()
 		
-	def get_random_doc(self):
-		count = self.allwords.count()
-		return self.allwords.find()[random.randrange(count)]
+	def get_random_doc(self, collection):
+		count = collection.count()
+		return collection.find()[random.randrange(count)]
 		
 	def sentenceGen(self):
 		result = ""
 		length = random.randint(1, 10)
 	
 		for i in range(length):
-			cursor = self.get_random_doc()
+			cursor = self.get_random_doc(self.allwords)
 			for x, y in cursor.items():
 				if x == "word":
 					cWord = (y)
@@ -83,15 +83,23 @@ class talkLoop(object):
 			compareChosen = max(compareList.iterkeys(), key=(lambda key: compareList[key]))
 		del cursor
 		return compareChosen
+		
+	def randomSentence(self):
+		cursor = self.get_random_doc(self.responses)
+		for x, y in cursor.items():
+			if x == 'humanReply':
+				chosenReply = (random.choice(y))
+		return chosenReply
 
 	def replyTumbler(self):
 		searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'on')
 		if searchSaid == ('none_match'):
 			searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'med')
 			if searchSaid == ('none_match'):
-				if random.randrange(100) <= 60:
-					searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'off')
-					chosenReply = self.dbSearch(searchSaid)			
+				if random.randrange(100) <= 75:
+					#searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'off')
+					#chosenReply = self.dbSearch(searchSaid)
+					return self.randomSentence()
 				else:	
 					chosenReply = self.sentenceGen()
 			else:

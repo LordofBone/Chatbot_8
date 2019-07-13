@@ -23,7 +23,7 @@ learnClass.updateDB(inputWords, globalReply)
 globalReply = (learnClass.replyTumbler())
 
 try:
-	if sys.argv[1] == ("fresh"):
+	if sys.argv[1] == ("-fresh"):
 		print("Clearing DB")
 		d.delDB()
 except:
