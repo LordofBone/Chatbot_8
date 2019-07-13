@@ -71,6 +71,7 @@ class talkLoop(object):
 		del cursor
 		return chosenReply
 		
+	#this function returns a random sentence from the entire db
 	def randomSentence(self):
 		cursor = self.get_random_doc(self.responses)
 		for x, y in cursor.items():
@@ -118,8 +119,7 @@ class talkLoop(object):
 		#if no matches then try with a lower accuracy to find a less similar sentence
 		if searchSaid == ('none_match'):
 			searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'med')
-			#if still no match then move onto generating a totally random reply either from words in the database (if there are over twenty stored)
-			#and if under twenty words stored run the search function with zero minimum accuracy to essentially return a random sentence the bot has said prior
+			#if still no match then move onto generating a totally random reply or grab a random sentence from the db
 			if searchSaid == ('none_match'):
 				if random.randrange(100) <= 75:
 					return self.randomSentence()		
