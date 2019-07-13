@@ -218,7 +218,7 @@ responses = db.responses
 allwords = db.allwords
 
 #accuracy variables
-botAccuracy = 0.725
+botAccuracy = 0.85
 botAccuracyLower = 0.45
 
 #blank variables

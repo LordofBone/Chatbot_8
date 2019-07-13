@@ -31,6 +31,9 @@ f = open("learning.txt", "r")
 for x in f:
 	if not re.search('[a-zA-Z]', x):
 		continue
+
+	if x[0] == ("(") or x[0] == ("-") or x[0] == ("*"):
+		continue
 		
 	print(x)
 
