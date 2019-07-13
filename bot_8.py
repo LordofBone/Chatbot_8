@@ -1,88 +1,75 @@
+#!/usr/bin/
+
+#imports
 import sys
+import os
+import subprocess
+import time
 import random
 import pymongo
 import datetime
-import sys
 import time
 import numpy
-import random
+from colors import *
 from pymongo import MongoClient
 from pprint import pprint
-from colors import *
 from difflib import SequenceMatcher
 
-client = MongoClient('localhost', 27017)
-db = client.words_database
-responses = db.responses
-allwords = db.allwords
-
-inputWords = ("hello")
-globalReply = ("hello")
-botAccuracy = 0.725
-botAccuracyLower = 0.45
-
+#main class where all the workings happen
 class talkLoop(object):
-
-	def __init__(self, client, db, responses, allwords, inputwords, globalReply, botAccuracy, botAccuracyLower):
+	
+	#initialise the class with all variables required
+	def __init__(self, name, client, db, responses, allwords, inputWords, globalReply, botAccuracy, botAccuracyLower):
+		self.name = name
 		self.client = client
 		self.db = db
 		self.responses = responses
 		self.allwords = allwords
-		self.inputwords = inputwords
+		self.wordsIn = inputWords
 		self.globalReply = globalReply
 		self.botAccuracy = botAccuracy
 		self.botAccuracyLower = botAccuracyLower
+		self.bResponse = globalReply
 		
+	#function for comparing string similarity
 	def similar(self, a, b):
 		return SequenceMatcher(None, a, b).ratio()
-		
-	def get_random_doc(self, collection):
-		count = collection.count()
-		return collection.find()[random.randrange(count)]
-		
+	
+	#function for grabbing a random document from the database
+	def get_random_doc(self):
+		count = self.allwords.count()
+		return self.allwords.find()[random.randrange(count)]
+	
+	#this function generates a random sentence at any length between 1 and 10 words long
 	def sentenceGen(self):
+		#set a clear string and set a random integer 1-10
 		result = ""
 		length = random.randint(1, 10)
-	
+		
+		#for the range in the integer above find a random word from the db and append to the string
 		for i in range(length):
-			cursor = self.get_random_doc(self.allwords)
+			cursor = self.get_random_doc()
 			for x, y in cursor.items():
 				if x == "word":
 					cWord = (y)
 					result += cWord
 					result += ' '
+					#clear the cursor
 					del cursor
-	
+		#return the constructed sentence
 		return result
 	
+	#this function searches the database for the input string and returns all replies for that string, returning a random one
 	def dbSearch(self, searchIn):
+		#search the database for inputs the bot has said prior
 		cursor = self.responses.find_one({"whatbotsaid": searchIn})
+		#return list of human replies to this response and choose one at random
 		for x, y in cursor.items():
 			if x == 'humanReply':
 				chosenReply = (random.choice(y))
+		#erase the cursor and return the chosen string
 		del cursor
 		return chosenReply
-		
-	def mongoFuzzyMatch(self, inputString, searchZone, termZone, setting):
-		compareList = {}
-		for cursor in searchZone.find():
-			for x, y in cursor.items():				
-				if x == termZone:
-					compareNo = self.similar(inputString, y)
-					if setting == ('off'):
-						compareList[y] = compareNo
-					elif setting == ('med'):
-						if compareNo > self.botAccuracyLower:
-							compareList[y] = compareNo
-					elif setting == ('on'):
-						if compareNo > self.botAccuracy:
-							compareList[y] = compareNo
-		if compareList == {}:
-			compareChosen = 'none_match'		
-		else:
-			compareChosen = max(compareList.iterkeys(), key=(lambda key: compareList[key]))
-		del cursor
-		return compareChosen
 		
 	def randomSentence(self):
 		cursor = self.get_random_doc(self.responses)
@@ -90,66 +77,186 @@ class talkLoop(object):
 			if x == 'humanReply':
 				chosenReply = (random.choice(y))
 		return chosenReply
-
+	
+	#the string comparison function
+	def mongoFuzzyMatch(self, inputString, searchZone, termZone, setting):
+		#create an empty dictionary
+		compareList = {}
+		#search the database passed in
+		for cursor in searchZone.find():
+			for x, y in cursor.items():
+				#find the item in the cursor that matches the search term passed into the function, eg: 'whatbotsaid'				
+				if x == termZone:
+					#compare the input string to the current string in the cursor, which returns a decimal point of accuracy (0.0 > 1.0)
+					compareNo = self.similar(inputString, y)
+					#if accuracy is off then append the string and its accuracy to the dictionary no matter the accuracy
+					if setting == ('off'):
+						compareList[y] = compareNo
+					#if accuracy is medium then append the string and its accuracy to the dictionary only if its over the medium setting
+					elif setting == ('med'):
+						if compareNo > self.botAccuracyLower:
+							compareList[y] = compareNo
+					#if accuracy is on/high then append the string and its accuracy to the dictionary only if its over the on/high setting
+					elif setting == ('on'):
+						if compareNo > self.botAccuracy:
+							compareList[y] = compareNo
+		#if nothing found then return a non match
+		if compareList == {}:
+			compareChosen = 'none_match'
+		#if there are matching strings identify the highest accuracy from the dictionary made above		
+		else:
+			compareChosen = max(compareList.iterkeys(), key=(lambda key: compareList[key]))
+		#erase the cursor and return the chosen matching string
+		del cursor
+		return compareChosen
+	
+	
 	def replyTumbler(self):
+		#find the search string using the high accuracy number - to find a decent match to what the bot has said prior
+		#when this function is called it required four arguments: the human response, the database to search on, the response required from the database and the accuracy level
 		searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'on')
+		#if no matches then try with a lower accuracy to find a less similar sentence
 		if searchSaid == ('none_match'):
 			searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'med')
+			#if still no match then move onto generating a totally random reply either from words in the database (if there are over twenty stored)
+			#and if under twenty words stored run the search function with zero minimum accuracy to essentially return a random sentence the bot has said prior
 			if searchSaid == ('none_match'):
 				if random.randrange(100) <= 75:
-					#searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'off')
-					#chosenReply = self.dbSearch(searchSaid)
-					return self.randomSentence()
+					return self.randomSentence()		
 				else:	
 					chosenReply = self.sentenceGen()
 			else:
+				#pass the response into the database to find prior human responses to the above sentence
 				chosenReply = self.dbSearch(searchSaid)
-		else:		
+		else:
+			#pass the response into the database to find prior human responses to the above sentence		
 			chosenReply = self.dbSearch(searchSaid)
+		#clear the search variable
 		del searchSaid
+		self.bResponse = chosenReply
 		return (chosenReply)
 
-	def updateDB(self, wordsIn, bResponse):
+	#this function passes in the information from the loop, the input reply and the bots last reply and appends them to the database	
+	def updateDB(self, wordsIn):
 		self.wordsIn = wordsIn
-		self.bResponse = bResponse
+		
+		#search the database for prior responses the bot has said
 		cursor = self.responses.find_one({"whatbotsaid": self.bResponse})
-
+		#if none then store a new bot response with the humans reply
 		if cursor is None:
 			postR = {"whatbotsaid": self.bResponse, "humanReply": [self.wordsIn]}
 			self.responses.insert_one(postR).inserted_id
 			del cursor
+		#if already existing then update the database with a new reply
 		else:
 			self.responses.update({"whatbotsaid": self.bResponse}, {'$addToSet':{"humanReply": self.wordsIn}}, upsert=True)
+			#clear the cursor
 			del cursor
+		
+		#split the input sentence into individual words and store each in the database
 		wordsInDB = self.wordsIn.split(' ')
 		for word in wordsInDB:
+			#search the database for the word
 			cursor = self.allwords.find_one({"word": word})
+			#if its not already in the database then insert into the database
 			if cursor is None:
 				postW = {"word": word}
 				self.allwords.insert_one(postW).inserted_id
+			#if the word is already in the database pass and clear the cursor
 			else:
 				pass
 			del cursor
+			
 
-if __name__ == "__main__":
+def dbWordsUpdate(objectIn):
+	#split the input sentence into individual words and store each in the database
+	wordsInDB = objectIn.split(' ')
+	for word in wordsInDB:
+		#search the database for the word
+		cursor = allwords.find_one({"word": word})
+		#if its not already in the database then insert into the database
+		if cursor is None:
+			postW = {"word": word}
+			allwords.insert_one(postW).inserted_id
+		#if the word is already in the database pass and clear the cursor
+		else:
+			pass
+		del cursor
+		
+def conversation(inputWords, personName):
+	#if person name is already initialised as a class with talk loop then check if its the same as the previous person from last response
+	if personName in name_dict:
+		if personName == prevPerson["prev_person"]:
+			#if it is still the same person chatbot talking to put their response in and get a reply from the bot
+			name_dict[personName].updateDB(inputWords)
+			globalReply = (name_dict[personName].replyTumbler())
+		else:
+			#if it is a different person from before then get a reponse from the bot using the humans prior response - to continue the conversation
+			globalReply = (name_dict[personName].replyTumbler())
+	else:
+		#if human new then initialise them with the talk loop class
+		name_dict.update({personName: talkLoop(name=personName, client=client, db=db, responses=responses, allwords=allwords, inputWords="hello", globalReply="hello", botAccuracy=botAccuracy, botAccuracyLower=botAccuracyLower)})
+		#get an intial reply
+		globalReply = (name_dict[personName].replyTumbler())
+		#combine the greeting with the humans name
+		globalReply = str(globalReply + " " + personName)
+	
+	#set previous person
+	prevPerson["prev_person"] = personName
+	
+	#return the reply
+	return globalReply
+		
+#setting up variables for mongodb
+client = MongoClient('localhost', 27017)
+db = client.words_database
+responses = db.responses
+allwords = db.allwords
 
-	talkClass = talkLoop(client, db, responses, allwords, inputWords, globalReply, botAccuracy, botAccuracyLower)
-	talkClass.updateDB(inputWords, globalReply)
-	inputWords = (talkClass.replyTumbler())
-	talkClass.updateDB(inputWords, globalReply)
-	globalReply = (talkClass.replyTumbler())
+#accuracy variables
+botAccuracy = 0.725
+botAccuracyLower = 0.45
+
+#blank variables
+name_dict = {}
+prevPerson = {"prev_person": ""}
+
+#if called direct then run the function
+if __name__ == '__main__':
+	#request name
 	sys.stdout.write(BLUE)
-	print (globalReply)
+	name = raw_input('Your name:	')
+	sys.stdout.write(RESET)
+	
+	#get reply and print for logging/debugging
+	reply = conversation(input, name)
+	sys.stdout.write(RED)
+	print("Bot: " + reply)
 	sys.stdout.write(RESET)
 
 	while True:
-		sys.stdout.write(GREEN)
-		inputWords = raw_input('You:	')
-		sys.stdout.write(RESET)
-		if inputWords == (""):
-			continue
-		talkClass.updateDB(inputWords, globalReply)
-		globalReply = (talkClass.replyTumbler())
+		#get another response and print
 		sys.stdout.write(BLUE)
-		print(globalReply)
+		input = raw_input('You:	')
+		sys.stdout.write(RESET)#
+		#if response is blank, rerun loop
+		if input == (""):
+			continue
+		#with 'change_name' typed in it will request new name - for debugging and testing
+		if input == ("change_name"):
+			sys.stdout.write(BLUE)
+			name = raw_input('Your name:	')
+			sys.stdout.write(RESET)
+			#get another reply
+			reply = conversation(input, name)
+			#print reply
+			sys.stdout.write(RED)
+			print("Bot: " + reply)
+			sys.stdout.write(RESET)
+			#rerun the loop with new name
+			continue
+		#for a normal response grab another reply and print
+		reply = conversation(input, name)
+		sys.stdout.write(RED)
+		print("Bot: " + reply)
 		sys.stdout.write(RESET)
