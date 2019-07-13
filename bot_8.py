@@ -137,9 +137,13 @@ class talkLoop(object):
 					#if still no match then move onto generating a totally random reply or grab a random sentence from the db
 					if searchSaid == ('none_match'):
 						if random.randrange(100) <= 60:
-							return self.randomSentence()									
+							chosenReply = self.randomSentence()	
+							self.bResponse = chosenReply
+							return (chosenReply)							
 						else:
-							return self.sentenceGen()
+							chosenReply = self.sentenceGen()
+							self.bResponse = chosenReply
+							return (chosenReply)
 					else:
 						#pass the response into the database to find prior human responses to the above sentence
 						chosenReply = self.dbSearch(searchSaid)
