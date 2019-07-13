@@ -14,6 +14,7 @@ from colors import *
 from pymongo import MongoClient
 from pprint import pprint
 from difflib import SequenceMatcher
+from fuzzywuzzy import fuzz
 
 #main class where all the workings happen
 class talkLoop(object):
@@ -91,16 +92,22 @@ class talkLoop(object):
 				#find the item in the cursor that matches the search term passed into the function, eg: 'whatbotsaid'				
 				if x == termZone:
 					#compare the input string to the current string in the cursor, which returns a decimal point of accuracy (0.0 > 1.0)
-					compareNo = self.similar(inputString, y)
+					
+					#OLD METHOD
+					#compareNo = self.similar(inputString, y)
+					
 					#if accuracy is off then append the string and its accuracy to the dictionary no matter the accuracy
 					if setting == ('off'):
+						compareNo = fuzz.token_sort_ratio(inputString, y)
 						compareList[y] = compareNo
 					#if accuracy is medium then append the string and its accuracy to the dictionary only if its over the medium setting
 					elif setting == ('med'):
+						compareNo = fuzz.partial_ratio(inputString.lower(), y.lower())
 						if compareNo > self.botAccuracyLower:
 							compareList[y] = compareNo
 					#if accuracy is on/high then append the string and its accuracy to the dictionary only if its over the on/high setting
 					elif setting == ('on'):
+						compareNo = fuzz.ratio(inputString.lower(), y.lower())
 						if compareNo > self.botAccuracy:
 							compareList[y] = compareNo
 		#if nothing found then return a non match
@@ -126,9 +133,9 @@ class talkLoop(object):
 			searchSaid = self.mongoFuzzyMatch(self.wordsIn, self.responses, 'whatbotsaid', 'med')
 			#if still no match then move onto generating a totally random reply or grab a random sentence from the db
 			if searchSaid == ('none_match'):
-				if random.randrange(100) <= 75:
-					return self.randomSentence()		
-				else:	
+				if random.randrange(100) <= 60:
+					return self.randomSentence()						
+				else:
 					chosenReply = self.sentenceGen()
 			else:
 				#pass the response into the database to find prior human responses to the above sentence
@@ -218,8 +225,8 @@ responses = db.responses
 allwords = db.allwords
 
 #accuracy variables
-botAccuracy = 0.85
-botAccuracyLower = 0.45
+botAccuracy = 95
+botAccuracyLower = 75
 
 #blank variables
 name_dict = {}
