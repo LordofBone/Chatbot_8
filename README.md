@@ -4,6 +4,8 @@ To run this you will need to install:
 
 pip install fuzzywuzzy
 
+pip install python-Levenshtein
+
 sudo apt-get install mongodb && sudo service mongodb start
 
 python -m pip install pymongo==3.4.0
