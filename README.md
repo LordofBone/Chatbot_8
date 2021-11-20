@@ -108,7 +108,10 @@ _Me: How are you_
 
 It will split these lines by ':' and return the reply only; this makes it easier to paste in things like movie scripts.
 
-You can then run 'bot_8_trainer.py' if running a local PostgreSQL or a PostgreSQL in a container.
+You can then run 'bot_8_trainer.py -f' if running a local PostgreSQL or a PostgreSQL in a container.
+
+The '-f' switch there is for a fresh DB which is required for a first time run and will also completely erase any 
+existing database.
 
 If you are running a bot within a container it will take in whatever is in the training folder and train automatically
 while creating the container.
