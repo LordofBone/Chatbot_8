@@ -10,6 +10,7 @@ load_bar_mode = LOAD_BAR
 load_bar_colour = '#E23838'
 
 
+# todo: find out why this isn't erasing the db
 @progress_bar(expected_time=1, increments=100, description=text_color("Erasing DB", RED), ascii_bar=load_bar_mode,
               colour_bar_set=load_bar_colour)
 def delete_db(database_name="words_database", keep_alive=False):
