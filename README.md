@@ -88,6 +88,11 @@ As above, you will need to install 'smlr' you can exec into the PostgreSQL conta
 
 ### Training the bot
 
+If you are running the bot code outside a container, but with a Docker container for the DB don't forget to set up a 
+python venv (https://docs.python-guide.org/dev/virtualenvs/) and install the requirements:
+
+`pip install -r requirements.txt`
+
 Drop training txt files into the '/data/training' folder, these must be formatted as such:
 
 **example.txt:**
