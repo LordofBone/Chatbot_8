@@ -2,6 +2,8 @@
 
 ###### Pre-requisites
 
+Ensure you have Python 3.9 installed (this is what I have been using for it so far).
+
 Before doing any of the below you will need to set a password for the PostgreSQL database, this can be done by going
 into the 'config' folder and accessing 'postgresql_config.yaml' and adding/changing the password; or you can leave it
 at the default. 
