@@ -2,6 +2,9 @@
 
 ###### Pre-requisites
 
+You can read more about how the Chatbot works here: https://www.hackster.io/314reactor/chatbot-2022-edition-633823 
+https://www.electromaker.io/project/view/chatbot-2022-edition
+
 Ensure you have Python 3.9 installed (this is what I have been using for it so far).
 
 Before doing any of the below you will need to set a password for the PostgreSQL database, this can be done by going
