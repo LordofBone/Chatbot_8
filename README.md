@@ -17,6 +17,12 @@ for the .sh files, for example: ./build_chatbot_linux.sh *container name *postgr
 
 You will need Docker installed, for linux you can run the script under /build 'install_docker_linux.sh'
 
+If this does not work you may need to follow the instructions here (as I have found on Linux x86): 
+https://phoenixnap.com/kb/how-to-install-docker-on-debian-10
+
+You also need to ensure libpq-dev is installed - this is included in the Docker installation shell file, but if you are
+following the above link from pheonixapp to install Docker you may have missed this.
+
 On Linux it is handy to have a GUI for Docker as well so run 'portainer_build_linux.sh' and 'portainer_run_linux.sh' 
 and then go to localhost:9000 in a browser - as there isn't currently an official Docker UI for Linux yet.
 
