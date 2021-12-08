@@ -134,6 +134,9 @@ while creating the container.
 
 You can have multiple txt files within the training folder; it will process them all.
 
+For large training sets you may need to increase the swap file on Linux/Pi to 2048mb:
+https://cloudolife.com/2021/01/01/Raspberry-Pi/Resizing-or-disable-Swap-Size/
+
 As mentioned above there is a second training folder: '/data/training_2', this is for training a second bot for
 conversations - both bots can be trained by running 'bot_8_trainer.py -f -m' (-f for fresh DB and -m for multi-bot)
 
