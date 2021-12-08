@@ -63,7 +63,7 @@ def bot_trainer(dbname="words_database", fresh_db=False, directory=r'training', 
                 # Split sentences via ':' and get the last item; this is handy for parsing movie scripts and avoiding
                 # character names.
                 try:
-                    sentence_in = str(sentence_in.split(": ")[-1])
+                    sentence_in = str(sentence_in.split(":")[-1].lstrip())
                 except IndexError:
                     pass
                 # Pass the line into the bot to train it.
