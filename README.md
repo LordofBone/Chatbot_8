@@ -147,7 +147,7 @@ conversations - both bots can be trained by running 'bot_8_trainer.py -f -m' (-f
 Run 'run_chatbot.cmd' and type the name of the built chatbot.
 
 For a two bot conversation container that has been built you can run 'run_chatbot_conversation.cmd' and then type the name
-of the container. You will then see the two bot personas talk to each other. By default this will be set to 'slow' mode;
+of the container. You will then see the two bot personas talk to each other. By default, this will be set to 'slow' mode;
 where there is a one-second delay added between the bots replies, so you can easily see what they are saying (you may
 notice it runs slower anyway depending on the size of the dataset).
 
@@ -202,11 +202,11 @@ response, then exit. If it is a containerised version then it will also stop the
 ### Using the bot as a part of another program
 
 If you want to integrate the bot into another system, such as a robot - you can pull down the repo into the folder of
-the project you are working on, then in the folder you can run 'pip install -e Bot8' with the current project python
-environment activated.
+the project you are working on, then append the system path of the Chatbot folder to the system path of the project.
 
-Running the '-e' flag puts it into editable mode which means you can easily access the '/config/postgresql_config.yaml'
-and add in a password for the database; As well as being able to edit the bot overall.
+`chatbot_dir = os.path.join( path_to_chatbot )`
+
+`sys.path.append(chatbot_dir)`
 
 Within the Bot8/build folder there is a build_postgresql_container.cmd you can use to quickly build a DB container.
 Ensure this is running also before proceeding.
