@@ -208,10 +208,10 @@ the project you are working on, then append the system path of the Chatbot folde
 
 `sys.path.append(chatbot_dir)`
 
+You will also need to install everything in requirements.txt and/or add the requirements to your project's requirements.txt
+
 Within the Bot8/build folder there is a build_postgresql_container.cmd you can use to quickly build a DB container.
 Ensure this is running also before proceeding.
-
-You will also need to install everything in requirements.txt and/or add the requirements to your project's requirements.txt
 
 Within the Bot8 folder you can add training files into '/data/training' then training can be run:
 
