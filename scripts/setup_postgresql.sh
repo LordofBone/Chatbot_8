@@ -11,7 +11,9 @@ Org='\033[01;38;5;202m'
 echo -e "${Whi}<<Configuring Postgres Container>>${RCol}"
 
 echo -e "${Red}Updating apt-get & upgrading${RCol}"
-apt-get update -qq >/dev/null && apt-get full-upgrade -qq >/dev/null
+# todo: full upgrade appears to break things on windows now, need to determine if this is even needed
+#apt-get update -qq >/dev/null && apt-get full-upgrade -qq >/dev/null
+apt-get update -qq >/dev/null
 
 echo -e "${Org}Installing apt-get packages${RCol}"
 apt-get install -qq \
