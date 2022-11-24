@@ -4,8 +4,6 @@ from pathlib import Path
 import yaml
 
 
-# todo need to figure out a way to make the folders here be able to work in the root folder of another project if
-#  installed via pip install (rather than -e for editable) or imported.
 @dataclass
 class YAMLData:
     """Parses out the YAML data and stores it for use by other modules """

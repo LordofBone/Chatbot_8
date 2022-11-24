@@ -18,9 +18,6 @@ load_bar_mode = LOAD_BAR
 load_bar_colour = '#009CDF'
 
 
-# todo need to figure out a way to make the folders here be able to work in the root folder of another project if
-#  installed via pip install (rather than -e for editable) or imported.
-
 def bot_trainer(dbname="words_database", fresh_db=False, directory=r'training', bot_id_mk="bot_1"):
     """This will train a bot using all .txt files under the training folders (data/training and data/training_2) """
     if fresh_db:
