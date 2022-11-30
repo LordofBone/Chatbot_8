@@ -1,0 +1,1 @@
+docker build -t chatbot_db_base:latest -f ../docker/Dockerfile ../
