@@ -8,6 +8,7 @@ from time import sleep
 
 import psycopg2
 
+from run_container_stack import run_all
 from config.bot_defaults import *
 from ml.markovify.markovify_sentence_generator import MKGenerator
 from utils.db_connection import ConnectionCreator
@@ -184,9 +185,13 @@ def configure_smlar(connection):
 
 class BotLoop:
     def __init__(self, previous_response="hello", train_mode=False, short_term_memory_limit=max_short_term_memory,
-                 enable_short_term_memory=True, include_possible_replies=False, bot_select="bot_1"):
+                 enable_short_term_memory=True, include_possible_replies=False,
+                 bot_select="bot_1", portainer_boot=False):
         """Instantiating this bot class also allows for customisation of the short term memory, training mode (no
         replies) """
+
+        if portainer_boot:
+            run_all()
 
         self.words_in = ""
         self.previous_response = previous_response
@@ -459,7 +464,7 @@ class BotLoop:
             return self.bot_reply
 
 
-def person_manager(person_name, bot="bot_1"):
+def person_manager(person_name, bot="bot_1", portainer_boot=False):
     """A function for handling different people talking to the bot, when a new name is passed in a new class gets
     instantiated with their name so that the bot can keep track of different conversations between different people """
     if person_name in name_dict:
@@ -467,7 +472,7 @@ def person_manager(person_name, bot="bot_1"):
         return bot_reply
     else:
         name_dict.update(
-            {person_name: BotLoop(previous_response=person_name, bot_select=bot)})
+            {person_name: BotLoop(previous_response=person_name, bot_select=bot, portainer_boot=portainer_boot)})
         bot_reply = name_dict[person_name].conversation("hello")
         return bot_reply
 
@@ -506,6 +511,9 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--alternate-bot', action="store_true", dest="alternate_bot",
                         help='Whether to run against words_database_2 (2nd bot)')
 
+    parser.add_argument('-p', '--portainer-run', action="store_false", dest="portainer_run",
+                        help='Whether to skip running of portainer/db container on startup')
+
     args = parser.parse_args()
 
     log_level = args.log_level
@@ -515,6 +523,7 @@ if __name__ == '__main__':
     bot_name = args.bot_name
     typing_emulation = args.typing_emulation
     alternate_bot = args.alternate_bot
+    portainer_run = args.portainer_run
 
     logging.basicConfig(level=log_level)
 
@@ -528,7 +537,7 @@ if __name__ == '__main__':
     # Request name and setup initial person to interact with the bot.
     name = input(text_color("Your name: ", GREEN))
 
-    reply = person_manager(person_name=name, bot=bot_main)
+    reply = person_manager(person_name=name, bot=bot_main, portainer_boot=portainer_run)
     print(text_color(f'{bot_name}: {reply}', OK_CYAN))
 
     while True:

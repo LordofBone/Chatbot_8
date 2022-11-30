@@ -18,7 +18,8 @@ load_bar_mode = LOAD_BAR
 load_bar_colour = '#009CDF'
 
 
-def bot_trainer(dbname="words_database", fresh_db=False, directory=r'training', bot_id_mk="bot_1"):
+def bot_trainer(dbname="words_database", fresh_db=False, directory=r'training',
+                bot_id_mk="bot_1", portainer_boot=False):
     """This will train a bot using all .txt files under the training folders (data/training and data/training_2) """
     if fresh_db:
         connection = fresh_db_setup(dbname=dbname, keep_connection=False)
@@ -27,7 +28,7 @@ def bot_trainer(dbname="words_database", fresh_db=False, directory=r'training', 
 
         connection = create_connection.get_connection()
 
-    bot = BotLoop(train_mode=True, bot_select=bot_id_mk)
+    bot = BotLoop(train_mode=True, bot_select=bot_id_mk, portainer_boot=portainer_boot)
 
     training_path = Path(__file__).parent / f"data/{directory}/"
 
@@ -90,22 +91,23 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--no-prints', action="store_true", dest="no_prints",
                         help='Whether to print updates (seems to conflict with loading bars when run from shell files)')
 
+    parser.add_argument('-p', '--portainer-run', action="store_false", dest="portainer_run",
+                        help='Whether to skip running of portainer/db container on startup')
+
     args = parser.parse_args()
 
     wipe_db = args.fresh_database
-
     log_level = args.log_level
-
     multi_bot = args.multi_bot
-
     no_prints = args.no_prints
+    portainer_run = args.portainer_run
 
     logging.basicConfig(level=log_level)
 
     if not no_prints:
         print(text_color("Training bot 1", UNDERLINE))
 
-    bot_trainer(fresh_db=wipe_db)
+    bot_trainer(fresh_db=wipe_db, portainer_boot=portainer_run)
 
     if multi_bot:
         if not no_prints:
@@ -113,4 +115,5 @@ if __name__ == "__main__":
 
             sleep(0.1)
 
-        bot_trainer(dbname="words_database_2", fresh_db=wipe_db, directory=r'training_2', bot_id_mk="bot_2")
+        bot_trainer(dbname="words_database_2", fresh_db=wipe_db, directory=r'training_2', bot_id_mk="bot_2",
+                    portainer_boot=portainer_run)
