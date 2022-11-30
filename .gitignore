@@ -1,0 +1,13 @@
+.idea/
+__pycache__
+*.egg-info/
+*.pyc
+data/training/*
+!data/training/.gitkeep
+data/training_2/*
+!data/training_2/.gitkeep
+stuff.txt
+models/markovify/bot_1/*
+models/markovify/bot_2/*
+!models/markovify/bot_1/.gitkeep
+!models/markovify/bot_2/.gitkeep
