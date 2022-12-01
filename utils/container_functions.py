@@ -84,7 +84,7 @@ def run_chatbot():
     """
     print('Running chatbot')
 
-    run_chatbot_command = subprocess.Popen(['sh', './run/run_chatbot_db.sh', chatbot_name],
+    run_chatbot_command = subprocess.Popen(['sh', './docker/run_chatbot_db.sh', chatbot_name],
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE)
     stdout, stderr = run_chatbot_command.communicate()
