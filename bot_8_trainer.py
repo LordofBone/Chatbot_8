@@ -7,6 +7,7 @@ from time import sleep
 from tqdm.auto import tqdm
 
 from bot_8 import BotLoop
+from run_container_stack import run_all
 from database.setup_db import fresh_db_setup, existing_db_setup
 from ml.markovify.markovify_trainer import mk_trainer
 from utils.db_connection import ConnectionCreator
@@ -21,6 +22,9 @@ load_bar_colour = '#009CDF'
 def bot_trainer(dbname="words_database", fresh_db=False, directory=r'training',
                 bot_id_mk="bot_1", portainer_boot=False):
     """This will train a bot using all .txt files under the training folders (data/training and data/training_2) """
+    if portainer_boot:
+        run_all()
+
     if fresh_db:
         connection = fresh_db_setup(dbname=dbname, keep_connection=False)
     else:
@@ -28,7 +32,7 @@ def bot_trainer(dbname="words_database", fresh_db=False, directory=r'training',
 
         connection = create_connection.get_connection()
 
-    bot = BotLoop(train_mode=True, bot_select=bot_id_mk, portainer_boot=portainer_boot)
+    bot = BotLoop(train_mode=True, bot_select=bot_id_mk)
 
     training_path = Path(__file__).parent / f"data/{directory}/"
 
