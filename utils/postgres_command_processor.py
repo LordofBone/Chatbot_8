@@ -2,8 +2,15 @@ import psycopg2
 
 
 def command_processor(postgres_connection, commands, fetch_all=None, keep_alive=True):
-    """Has some handy code in to handle SQL queries into the DB and to deal with errors. I got this from
-    stackoverflow but I can't find the source now. It has been slightly modified for the purposes of this Chatbot """
+    """
+    Has some handy code in to handle SQL queries into the DB and to deal with errors. I got this from
+    stackoverflow but I can't find the source now. It has been slightly modified for the purposes of this Chatbot
+    :param postgres_connection:
+    :param commands:
+    :param fetch_all:
+    :param keep_alive:
+    :return:
+    """
     fetched = None
 
     try:

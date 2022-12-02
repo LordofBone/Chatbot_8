@@ -1,4 +1,6 @@
-"""Default configuration that is used if bot_8.py is imported (otherwise will use argparse config/defaults)"""
+"""
+Default configuration that is used if bot_8.py is imported (otherwise will use argparse config/defaults)
+"""
 bot_name = "Bot"
 
 log_level = "INFO"

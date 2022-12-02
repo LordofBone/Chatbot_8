@@ -14,7 +14,12 @@ load_bar_colour_2 = '#973999'
 @progress_bar(expected_time=1, increments=100, description=text_color("Creating indexes on DB", GREEN),
               ascii_bar=load_bar_mode, colour_bar_set=load_bar_colour_1)
 def index_db(postgres_connection, keep_alive=False):
-    """Create indexes on the existing database """
+    """
+    Create indexes on the database to speed up queries
+    :param postgres_connection:
+    :param keep_alive:
+    :return:
+    """
     commands = (
         """CREATE INDEX IF NOT EXISTS bot_response_index 
                 ON bot_responses USING GIN (to_tsvector('english',
@@ -34,6 +39,12 @@ def index_db(postgres_connection, keep_alive=False):
 @progress_bar(expected_time=1, increments=100, description=text_color("Reindexing DB", PURPLE), ascii_bar=load_bar_mode,
               colour_bar_set=load_bar_colour_2)
 def reindex_db(postgres_connection, keep_alive=False):
+    """
+    Reindex the database to speed up queries
+    :param postgres_connection:
+    :param keep_alive:
+    :return:
+    """
     commands = (
         """REINDEX TABLE bot_responses""",
         """REINDEX TABLE human_replies""",
@@ -44,7 +55,9 @@ def reindex_db(postgres_connection, keep_alive=False):
 
 
 if __name__ == "__main__":
-    """When called directly this can create indexes on on DB or both """
+    """
+    When called directly this can create indexes on on DB or both
+    """
     parser = argparse.ArgumentParser(description='Create indexes on DB or if DB already exists reindex existing')
 
     parser.add_argument('-r', '--reindex', action="store_true", dest="reindex", help='Will reindex existing '

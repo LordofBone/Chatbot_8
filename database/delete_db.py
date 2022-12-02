@@ -14,7 +14,12 @@ load_bar_colour = '#E23838'
 @progress_bar(expected_time=1, increments=100, description=text_color("Erasing DB", RED), ascii_bar=load_bar_mode,
               colour_bar_set=load_bar_colour)
 def delete_db(database_name="words_database", keep_alive=False):
-    """Erases entire DB by name passed in """
+    """
+    Delete database, configurable to erase different databases on the same PostgreSQL instance
+    :param database_name:
+    :param keep_alive:
+    :return:
+    """
     root_connection = ConnectionCreator(root=True)
     postgres_connection = root_connection.get_connection()
 
@@ -26,7 +31,9 @@ def delete_db(database_name="words_database", keep_alive=False):
 
 
 if __name__ == "__main__":
-    """When called directly can be used to delete one or both DB's """
+    """
+    When called directly can be used to delete one or both DB's
+    """
     parser = argparse.ArgumentParser(description='Deletes the entire PostgreSQL DB')
 
     parser.add_argument('-r', '--reindex', action="store_true", dest="reindex", help='Will reindex existing '

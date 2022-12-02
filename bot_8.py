@@ -22,6 +22,11 @@ prev_person = {"prev_person": ""}
 
 
 def quote_fixer(text_in):
+    """
+    Fixes quotes in text to prevent SQL injection and other weird things
+    :param text_in:
+    :return:
+    """
     """Escapes quotes in a string or removes newlines for insertion into the DB, to prevent errors"""
     if type(text_in) == str:
         text_in = text_in.translate({ord("'"): "''", ord("`"): "", ord("’"): ""}).rstrip()
@@ -30,7 +35,15 @@ def quote_fixer(text_in):
 
 
 def insert_db_single_field_text(connection, table, field_1, value_1, return_value_1):
-    """Inserts a single field of text into the DB"""
+    """
+    Inserts a single field of text into the DB
+    :param connection:
+    :param table:
+    :param field_1:
+    :param value_1:
+    :param return_value_1:
+    :return:
+    """
     value_1 = quote_fixer(value_1)
 
     logger.debug(f'Inserting text value: {value_1} into field {field_1} in table {table}')
@@ -64,7 +77,16 @@ def insert_db_single_field_text(connection, table, field_1, value_1, return_valu
 
 
 def insert_db_array(connection, table, field_1, field_2, value_1, value_2):
-    """Inserts a new array into the DB"""
+    """
+    Inserts a array into the DB
+    :param connection:
+    :param table:
+    :param field_1:
+    :param field_2:
+    :param value_1:
+    :param value_2:
+    :return:
+    """
     value_2 = quote_fixer(value_2)
 
     logger.debug(
@@ -89,7 +111,15 @@ def insert_db_array(connection, table, field_1, field_2, value_1, value_2):
 
 
 def search_db_one(connection, table, field, value):
-    """Performs a single DB search"""
+    """
+    Searches the DB for a single field
+    :param connection:
+    :param table:
+    :param field:
+    :param value:
+    :return:
+    """
+
     value = quote_fixer(value)
 
     command = ["""SELECT
@@ -106,8 +136,17 @@ def search_db_one(connection, table, field, value):
 
 # todo: need to figure out how to run a search with the foreign keys setup
 def db_search_fuzzy(connection, table, field_1, field_2, value_1, return_limit=1):
-    """Searches the database for the input string using SMLAR to search for most similar results, a match is not
-    found it will try again using Levenshtein, finally; if that fails - returns nothing """
+    """
+    Searches the database for the input string using SMLAR to search for most similar results, a match is not
+    found it will try again using Levenshtein, finally; if that fails - returns nothing
+    :param connection:
+    :param table:
+    :param field_1:
+    :param field_2:
+    :param value_1:
+    :param return_limit:
+    :return:
+    """
     value_1 = quote_fixer(value_1)
     # todo: find a way to add a return limit in for SMLAR? Seems at the moment it's returning many similar responses.
     command = ["""SELECT
@@ -160,7 +199,12 @@ def db_search_fuzzy(connection, table, field_1, field_2, value_1, return_limit=1
 
 
 def random_item(connection, table):
-    """Returns a random item from a table"""
+    """
+    Returns a random item from the DB
+    :param connection:
+    :param table:
+    :return:
+    """
     command = ["""SELECT
                     * 
                 FROM
@@ -176,14 +220,20 @@ def random_item(connection, table):
 
 
 def configure_smlar(connection):
-    """Called on loading of the bot to configure the smlar threshold, this is set either in config/bot_defaults.py or
-    via passed in argument when this is called by itself """
+    """
+    Configures the SMLAR extension
+    :param connection:
+    :return:
+    """
     command = ["""SELECT SET_LIMIT({0})""".format(bot_accuracy_smlar_threshold)]
 
     command_processor(connection, command, keep_alive=True)
 
 
 class BotLoop:
+    """
+    The main bot loop
+    """
     def __init__(self, previous_response="hello", train_mode=False, short_term_memory_limit=max_short_term_memory,
                  enable_short_term_memory=True, include_possible_replies=False,
                  bot_select="bot_1", portainer_boot=False):
@@ -213,6 +263,10 @@ class BotLoop:
         self.mk_setup()
 
     def establish_connection(self):
+        """
+        Establishes a connection to the DB
+        :return:
+        """
         # Try to connect to the DB - if not DB available but a markovify model is then the bot will switch to just
         # using dynamically generated replies from the model
         try:
@@ -237,6 +291,10 @@ class BotLoop:
             self.no_db = True
 
     def mk_setup(self):
+        """
+        Sets up the markovify model
+        :return:
+        """
         if self.mk_generator is None:
             if not self.train_mode:
                 if self.smart_sentence_gen:
@@ -270,8 +328,11 @@ class BotLoop:
     # todo: within a container the previous prints are not erased (probably linux issue), worked around with a long set
     #  of spaces
     def human_typing_emulator(self):
-        """If typing emulation is enabled this function makes it look like another person is typing, the length of
-        the string determines how long the 'typing' will happen """
+        """
+        Emulates human typing, if enabled this function makes it look like another person is typing, the length of
+        the string determines how long the 'typing' will happen
+        :return:
+        """
         sentence_words = (self.bot_reply.split())
 
         is_typing_name = ("\r{0} {1}".format(bot_name, "is typing..."))
@@ -293,12 +354,19 @@ class BotLoop:
         print("\r{}".format(""), end="")
 
     def short_term_memory_insert(self, sentence):
-        """The bot can have a short term memory enabled, to prevent it from saying the same thing again too quickly
-        and repeating itself, this is called to add the last boy reply into the queue """
+        """
+        Inserts a sentence into the short term memory, the bot can have a short term memory enabled, to prevent it
+        from saying the same thing again too quickly and repeating itself, this is called to add the last boy reply
+        into the queue :param sentence: :return:
+        """
         self.short_term_memory.append(sentence)
 
     def short_term_memory_checker(self, sentence):
-        """This will check if a sentence exists in recent memory (for when checking randomly generated sentences) """
+        """
+        Checks the short term memory to see if the sentence is in there, if it is then it returns false, if it is not
+        :param sentence:
+        :return:
+        """
         logger.debug(f'recent replies: {self.short_term_memory}')
         if [item for item in sentence if item in self.short_term_memory]:
             logger.debug(f'{sentence} found in replies')
@@ -308,7 +376,11 @@ class BotLoop:
             return False
 
     def short_term_memory_reply_cleaner(self, list_in):
-        """Cleans all recent replies from a reply list that was taken from a DB search """
+        """
+        Cleans all recent replies from a reply list that was taken from a DB search
+        :param list_in:
+        :return:
+        """
         short_term = list(self.short_term_memory)
 
         list_cleaned = [x for x in list_in if x not in short_term]
@@ -316,9 +388,11 @@ class BotLoop:
         return list_cleaned
 
     def sentence_gen(self):
-        """Gets a result from the random sentence generator, or if smart sentence generation is True uses markovify
-        to generate a sentence """
-
+        """
+        Gets a result from the random sentence generator, or if smart sentence generation is True uses markovify
+        to generate a sentence
+        :return:
+        """
         if self.smart_sentence_gen:
             logger.debug(f'Smart sentence gen ON generating sentence with markovify model')
             return self.mk_generator.generate_smart_sentence()
@@ -327,9 +401,11 @@ class BotLoop:
             return self.random_sentence_processor()
 
     def random_sentence_processor(self):
-        """This creates a random sentence, by picking a random whole sentence from the database, with a 35% chance of a
-        randomly generated sentence """
-
+        """
+        This creates a random sentence, by picking a random whole sentence from the database, with a 35% chance of a
+        randomly generated sentence
+        :return:
+        """
         result = ''
 
         if random.randrange(100) <= 35:
@@ -350,18 +426,24 @@ class BotLoop:
         return result
 
     def sentence_splitter(self):
-        """Splits the input sentence into individual words and stores each word in the database """
+        """
+        Splits the sentence into a list of words and stores each word in the database
+        :return:
+        """
         words_in_db = self.words_in.split(' ')
         for word in words_in_db:
             insert_db_single_field_text(self.db_connection, table="all_words", field_1="word", value_1=str(word),
                                         return_value_1="word_id")
 
     def reply_processor(self):
-        """This splits the sentence inputted and stores each word individually into the DB so the bot has more of a
+        """
+        This splits the sentence inputted and stores each word individually into the DB so the bot has more of a
         word pool to work with for random sentences etc. It then runs a fuzzy search on what the user inputted to
         find a similar response it has seen before. If one is found it then searches for a human reply to that
         sentence and picks it at random. If nothing is found it will generate a random sentence. If short-term memory
-        is on it will store the reply into recent replies. """
+        is on it will store the reply into recent replies.
+        :return:
+        """
         recent_sentence = True
         chosen_reply = ""
         self.reply_list = []
@@ -419,9 +501,10 @@ class BotLoop:
         return chosen_reply
 
     def update_db(self):
-        """Passes in the information from the loop, the input reply and the bots last reply and appends them to the
-        database """
-
+        """
+        This updates the database with the inputted sentence and the reply generated by the bot
+        :return:
+        """
         insert_id = insert_db_single_field_text(self.db_connection, table="bot_responses", field_1="bot_response",
                                                 value_1=self.previous_response,
                                                 return_value_1="bot_response_id")
@@ -438,7 +521,11 @@ class BotLoop:
         self.previous_response = self.words_in
 
     def conversation(self, input_words):
-        """Function to access from the class to converse with the bot """
+        """
+        This is the main function that runs the conversation. It takes the inputted sentence and processes it
+        :param input_words:
+        :return:
+        """
         if not self.no_db:
             self.words_in = input_words
 
@@ -465,8 +552,14 @@ class BotLoop:
 
 
 def person_manager(person_name, bot="bot_1", portainer_boot=False):
-    """A function for handling different people talking to the bot, when a new name is passed in a new class gets
-    instantiated with their name so that the bot can keep track of different conversations between different people """
+    """
+    A function for handling different people talking to the bot, when a new name is passed in a new class gets
+    instantiated with their name so that the bot can keep track of different conversations between different people
+    :param person_name:
+    :param bot:
+    :param portainer_boot:
+    :return:
+    """
     if person_name in name_dict:
         bot_reply = name_dict[person_name].bot_reply
         return bot_reply
@@ -478,12 +571,17 @@ def person_manager(person_name, bot="bot_1", portainer_boot=False):
 
 
 def get_person_list():
-    """When being imported into another system this is handy to retrieve all classes that have been instantiated """
+    """
+    When being imported into another system this is handy to retrieve all classes that have been instantiated
+    :return:
+    """
     return name_dict
 
 
 if __name__ == '__main__':
-    """When the module is called directly allow for configuration of fuzzy search thresholds etc. """
+    """
+    When the module is called directly allow for configuration of fuzzy search thresholds etc. 
+    """
     parser = argparse.ArgumentParser(description='Start a chat bot with accuracy parameters')
 
     parser.add_argument('-l', '--log-level', action="store", dest="log_level", type=str, default='INFO',

@@ -19,6 +19,10 @@ def progress_bar(expected_time, description, leave=True, increments=10, ascii_ba
             Display progress bar for expected_time_progress seconds.
             Complete early if future completes.
             Wait for future if it doesn't complete in expected_time_progress.
+            :param future:
+            :param expected_time_progress:
+            :param increments_progress:
+            :return:
             """
             interval = expected_time_progress / increments_progress
 

@@ -24,5 +24,10 @@ LOAD_BAR = " ░▒▓█"
 
 
 def text_color(text_to_color, color):
-    """Changes a string to a specified colour for the terminal """
+    """
+    This function will return the text with the color code added to the start and end of the string.
+    :param text_to_color:
+    :param color:
+    :return:
+    """
     return f'{color}{text_to_color}{RESET}'

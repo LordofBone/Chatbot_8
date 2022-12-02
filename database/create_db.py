@@ -13,7 +13,12 @@ load_bar_colour = '#F78200'
 @progress_bar(expected_time=1, increments=100, description=text_color("Creating DB", ORANGE), ascii_bar=load_bar_mode,
               colour_bar_set=load_bar_colour)
 def create_db(database_name="words_database", keep_alive=False):
-    """Create database, configurable to make different name databases on the same PostgreSQL instance """
+    """
+    Create database, configurable to make different name databases on the same PostgreSQL instance
+    :param database_name:
+    :param keep_alive:
+    :return:
+    """
     root_connection = ConnectionCreator(root=True)
     postgres_connection = root_connection.get_connection()
 
@@ -25,7 +30,8 @@ def create_db(database_name="words_database", keep_alive=False):
 
 
 if __name__ == "__main__":
-    """When called directly this can be used to create one bot DB or two (for getting two bots to talk to each other) 
+    """
+    When called directly this can be used to create one bot DB or two (for getting two bots to talk to each other) 
     """
     parser = argparse.ArgumentParser(description='Create DB on PostgreSQL')
 

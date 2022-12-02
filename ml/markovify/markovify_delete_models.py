@@ -8,6 +8,11 @@ logger = logging.getLogger("markovify-model-deletion-logger")
 
 
 def mk_model_delete(bot_model="bot_1"):
+    """
+    This will delete all the models for a given bot
+    :param bot_model:
+    :return:
+    """
     if os.path.exists(f'{models_dir}/{bot_model}/model.json'):
         os.remove(f'{models_dir}/{bot_model}/model.json')
     else:
@@ -15,7 +20,9 @@ def mk_model_delete(bot_model="bot_1"):
 
 
 if __name__ == "__main__":
-    """When called directly can be used to delete one or both MK models """
+    """
+    When called directly can be used to delete one or both MK models
+    """
     parser = argparse.ArgumentParser(description='Start training a chatbot with .txt files from /training')
 
     parser.add_argument('-l', '--log-level', action="store", dest="log_level", type=str, default='INFO',

@@ -9,7 +9,14 @@ logger = logging.getLogger("markovify-sentence-generator-logger")
 
 
 class MKGenerator:
+    """
+    This class sets up and runs the markovify sentence generator
+    """
     def __init__(self, bot="bot_1"):
+        """
+        This will load the markovify model
+        :param bot:
+        """
         self.bot = bot
 
         with open(f'{models_dir}/{bot}/model.json') as json_file:
@@ -20,6 +27,10 @@ class MKGenerator:
         logger.debug(f'Model loaded: {models_dir}/{bot}/model.json')
 
     def generate_smart_sentence(self):
+        """
+        This will generate a sentence using markovify
+        :return:
+        """
         generated_sentence = self.loaded_model.make_sentence()
 
         logger.debug(f'Testing sentence: {generated_sentence}')

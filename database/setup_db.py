@@ -10,7 +10,12 @@ from utils.print_colors import *
 
 
 def fresh_db_setup(dbname="words_database", keep_connection=False):
-    """Runs through a setup of a fresh database """
+    """
+    Create a new database and index it
+    :param dbname:
+    :param keep_connection:
+    :return:
+    """
     delete_db(database_name=dbname, keep_alive=False)
 
     create_db(database_name=dbname, keep_alive=False)
@@ -31,7 +36,9 @@ def existing_db_setup(db_connection, keep_connection=False):
 
 
 if __name__ == "__main__":
-    """When called directly can be used to setup one or both DB's """
+    """
+    When called directly can be used to setup one or both DB's
+    """
     parser = argparse.ArgumentParser(description='Setup the PostgreSQL DB')
 
     parser.add_argument('-f', '--fresh-db', action="store_true", dest="fresh_database",

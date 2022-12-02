@@ -13,8 +13,12 @@ load_bar_colour = '#FFB900'
 @progress_bar(expected_time=1, increments=100, description=text_color("Creating tables on DB", YELLOW),
               ascii_bar=load_bar_mode, colour_bar_set=load_bar_colour)
 def create_tables_db(postgres_connection, keep_alive=False):
-    """Create tables in the PostgreSQL database """
-
+    """
+    Create tables on the database
+    :param postgres_connection:
+    :param keep_alive:
+    :return:
+    """
     commands = (
         """
         CREATE TABLE IF NOT EXISTS bot_responses(
@@ -48,7 +52,9 @@ def create_tables_db(postgres_connection, keep_alive=False):
 
 
 if __name__ == "__main__":
-    """When called directly can be used to create tables on one or both DB's """
+    """
+    When called directly can be used to create tables on one or both DB's
+    """
     parser = argparse.ArgumentParser(description='Create tables on the PostgreSQL DB')
 
     parser.add_argument('-r', '--reindex', action="store_true", dest="reindex", help='Will reindex existing '

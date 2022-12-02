@@ -18,6 +18,13 @@ load_bar_colour = '#FF00FF'
 
 
 def mk_trainer(bot_data="training", bot_model="bot_1"):
+    """
+    This will train a markovify model using all .txt files under the training folders (data/training and
+    data/training_2)
+    :param bot_data:
+    :param bot_model:
+    :return:
+    """
     mk_model_delete(bot_model)
 
     # This determines the line count of all the training files in the training folder.
@@ -54,7 +61,9 @@ def mk_trainer(bot_data="training", bot_model="bot_1"):
 
 
 if __name__ == "__main__":
-    """When called directly can be used to train one or both MK models """
+    """
+    When called directly can be used to train one or both MK models
+    """
     parser = argparse.ArgumentParser(description='Start training a chatbot with .txt files from /training')
 
     parser.add_argument('-l', '--log-level', action="store", dest="log_level", type=str, default='INFO',

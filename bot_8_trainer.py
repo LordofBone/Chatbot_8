@@ -21,7 +21,15 @@ load_bar_colour = '#009CDF'
 
 def bot_trainer(dbname="words_database", fresh_db=False, directory=r'training',
                 bot_id_mk="bot_1", portainer_boot=False):
-    """This will train a bot using all .txt files under the training folders (data/training and data/training_2) """
+    """
+    This will train a bot using all .txt files under the training folders (data/training and data/training_2)
+    :param dbname:
+    :param fresh_db:
+    :param directory:
+    :param bot_id_mk:
+    :param portainer_boot:
+    :return:
+    """
     if portainer_boot:
         run_all()
 
@@ -80,7 +88,9 @@ def bot_trainer(dbname="words_database", fresh_db=False, directory=r'training',
 
 
 if __name__ == "__main__":
-    """When called directly can be used to train one or both DB's and whether to erase the DB's beforehand """
+    """
+    When called directly can be used to train one or both DB's and whether to erase the DB's beforehand
+    """
     parser = argparse.ArgumentParser(description='Start training a chatbot with .txt files from /training')
 
     parser.add_argument('-f', '--fresh-db', action="store_true", dest="fresh_database",

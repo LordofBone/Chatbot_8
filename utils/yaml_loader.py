@@ -6,7 +6,9 @@ import yaml
 
 @dataclass
 class YAMLData:
-    """Parses out the YAML data and stores it for use by other modules """
+    """
+    This class will load the YAML file and return the data as a class.
+    """
     postgresql_password: str = ""
 
     def __post_init__(self):
@@ -22,5 +24,7 @@ class YAMLData:
 YAMLAccess = YAMLData()
 
 if __name__ == "__main__":
-    # Perform a test by parsing yaml file and printing the data
+    """
+    This will print the yaml data to the console.
+    """
     print(YAMLAccess.postgresql_password)

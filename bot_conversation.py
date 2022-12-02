@@ -7,8 +7,15 @@ from utils.print_colors import *
 
 
 def bot_conversation(name_1, name_2, fast_mode=False, portainer_boot=False):
-    """Two bots are setup, initial replies are stored and then passed into the loop; passing each response from one
-    bot into the input of the other """
+    """
+    Two bots are setup, initial replies are stored and then passed into the loop; passing each response from one
+    bot into the input of the other
+    :param name_1:
+    :param name_2:
+    :param fast_mode:
+    :param portainer_boot:
+    :return:
+    """
     reply_1 = person_manager(person_name=name_1)
 
     person_manager(person_name=name_2, bot="bot_2", portainer_boot=portainer_boot)
@@ -38,8 +45,10 @@ def bot_conversation(name_1, name_2, fast_mode=False, portainer_boot=False):
 
 
 if __name__ == "__main__":
-    """When called initiate two bots and begin their conversation with each other, this can be sued to configure the 
-    names beyond the defaults """
+    """
+    When called initiate two bots and begin their conversation with each other, this can be sued to configure the 
+    names beyond the defaults
+    """
     parser = argparse.ArgumentParser(description='Make 2 bots with different databases talk to each other')
 
     parser.add_argument('-n1', '--name-1', action="store", dest="name_1", type=str, default="Joe", help='Name of Bot 1')
