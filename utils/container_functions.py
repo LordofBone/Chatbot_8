@@ -1,6 +1,13 @@
 import subprocess
 from config.container_config import *
 
+"""
+This automates the process of running portainer and running the chatbot container
+Not all of these are being used currently, as there are issues with the scripts and relative paths in the scripts
+if these are called from the chatbot root directory so a todo: is to fix this and then automate the process of
+creating the chatbot container as well as running it
+"""
+
 
 def install_docker():
     """
